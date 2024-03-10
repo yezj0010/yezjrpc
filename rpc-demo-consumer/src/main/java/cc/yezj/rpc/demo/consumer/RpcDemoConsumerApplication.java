@@ -35,6 +35,8 @@ public class RpcDemoConsumerApplication {
             System.out.println(user);
             Order order = orderService.queryOne(202);
             System.out.println(order);
+            String test = orderService.test(404);
+            System.out.println(test);
         };
     }
 

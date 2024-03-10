@@ -17,3 +17,13 @@ Content-Type: application/json
   "method": "queryOne",
   "args": [200]
 }
+
+### 报错
+POST http://localhost:8080/
+Content-Type: application/json
+
+{
+"service": "cc.yezj.rpc.demo.api.OrderService",
+"method": "test",
+"args": [404]
+}
