@@ -11,4 +11,5 @@ public class RpcResponse<T> {
     private boolean success;
     private int code;
     private T data;
+    private Exception exception;
 }

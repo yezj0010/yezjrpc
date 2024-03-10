@@ -37,16 +37,18 @@ public class ProviderBootStrap implements ApplicationContextAware {
     }
 
     public RpcResponse invoke(RpcRequest request) {
+        RpcResponse rpcResponse = new RpcResponse();
         Object bean = skeleton.get(request.getService());
         try {
             Method method = findMethod(bean.getClass(), request.getMethod());
             Object result = method.invoke(bean, request.getArgs());
-            return new RpcResponse(true, 0, result);
+            return new RpcResponse(true, 0, result, null);
         } catch (InvocationTargetException e) {
-            throw new RuntimeException(e);
+            rpcResponse.setException(e);
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            rpcResponse.setException(e);
         }
+        return rpcResponse;
     }
 
     private Method findMethod(Class<?> aClass, String methodName) {

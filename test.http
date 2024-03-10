@@ -1,0 +1,19 @@
+### 获取用户信息
+POST http://localhost:8080/
+Content-Type: application/json
+
+{
+  "service": "cc.yezj.rpc.demo.api.UserService",
+  "method": "findById",
+  "args": [100]
+}
+
+### 获取订单信息
+POST http://localhost:8080/
+Content-Type: application/json
+
+{
+  "service": "cc.yezj.rpc.demo.api.OrderService",
+  "method": "queryOne",
+  "args": [200]
+}

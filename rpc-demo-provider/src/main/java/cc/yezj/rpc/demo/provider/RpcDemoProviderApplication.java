@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.PreparedStatement;
 
@@ -20,6 +21,7 @@ import java.sql.PreparedStatement;
 // 优质的 spring/boot/data/security/cloud 框架中文文档尽在 => https://springdoc.cn
 @SpringBootApplication
 @Import(ProviderConfig.class)
+@RestController
 public class RpcDemoProviderApplication {
 	@Resource
 	private ProviderBootStrap providerBootStrap;
@@ -45,8 +47,8 @@ public class RpcDemoProviderApplication {
 //			request.setArgs(new Object[]{100});
 
 			request.setService("cc.yezj.rpc.demo.api.OrderService");
-			request.setMethod("test");
-			request.setArgs(new Object[]{});
+			request.setMethod("queryOne");
+			request.setArgs(new Object[]{10});
 			RpcResponse invoke = invoke(request);
 			System.out.printf("return " + invoke);
 		};
