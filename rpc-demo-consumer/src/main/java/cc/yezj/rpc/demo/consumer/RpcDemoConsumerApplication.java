@@ -31,12 +31,14 @@ public class RpcDemoConsumerApplication {
     public ApplicationRunner consumerRunner(){
         System.out.printf("execute consumerRunner");
         return x -> {
-            User user = userService.findById(1);
+            User user = userService.findById(1L);
             System.out.println(user);
-            Order order = orderService.queryOne(202);
-            System.out.println(order);
-            String test = orderService.test(404);
-            System.out.println(test);
+            User user2 = userService.findById(2, "llllll");
+            System.out.println(user2);
+//            Order order = orderService.queryOne(202);
+//            System.out.println(order);
+//            String test = orderService.test(404);
+//            System.out.println(test);
         };
     }
 

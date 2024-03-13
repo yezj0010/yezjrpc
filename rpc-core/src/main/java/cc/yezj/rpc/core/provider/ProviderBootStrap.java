@@ -1,18 +1,24 @@
 package cc.yezj.rpc.core.provider;
 
 import cc.yezj.rpc.core.annotation.YezjProvider;
+import cc.yezj.rpc.core.meta.ProviderMeta;
 import cc.yezj.rpc.core.model.request.RpcRequest;
 import cc.yezj.rpc.core.model.request.RpcResponse;
+import cc.yezj.rpc.core.util.MethodUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Data
 public class ProviderBootStrap implements ApplicationContextAware {
@@ -20,10 +26,10 @@ public class ProviderBootStrap implements ApplicationContextAware {
     @Resource
     private ApplicationContext applicationContext;
 
-    private Map<String, Object> skeleton = new HashMap<>();
+    private MultiValueMap<String, ProviderMeta> skeleton = new LinkedMultiValueMap<>();//一个key多个值
 
     @PostConstruct
-    public void buildProviders(){
+    public void start(){
         Map<String, Object> providersMap = applicationContext.getBeansWithAnnotation(YezjProvider.class);
         providersMap.forEach((k,v) -> System.out.printf(k));
         providersMap.values().forEach(this::getInterface);
@@ -32,16 +38,32 @@ public class ProviderBootStrap implements ApplicationContextAware {
     private void getInterface(Object x){
         Class<?>[] interfaces = x.getClass().getInterfaces();
         Class<?> anInterface = interfaces[0];
-        skeleton.put(anInterface.getCanonicalName(), x);
+        Method[] methods = anInterface.getMethods();
+        for(Method method : methods){
+            if(MethodUtil.checkLocalMethod(method)){
+                continue;
+            }
+            createProvider(anInterface, x, method);
+        }
+    }
 
+    private void createProvider(Class<?> anInterface, Object x, Method method) {
+        ProviderMeta providerMeta = new ProviderMeta();
+        providerMeta.setMethod(method);
+        providerMeta.setMethodSign(MethodUtil.methodSign(method));
+        providerMeta.setServiceImpl(x);
+        System.out.println("create providerMeta="+providerMeta);
+        skeleton.add(anInterface.getCanonicalName(), providerMeta);
     }
 
     public RpcResponse invoke(RpcRequest request) {
+        String methodSign = request.getMethodSign();
         RpcResponse rpcResponse = new RpcResponse();
-        Object bean = skeleton.get(request.getService());
+        List<ProviderMeta> providerMetas = skeleton.get(request.getService());
+
         try {
-            Method method = findMethod(bean.getClass(), request.getMethod());
-            Object result = method.invoke(bean, request.getArgs());
+            ProviderMeta meta = findProviderMeta(providerMetas, methodSign);
+            Object result = meta.getMethod().invoke(meta.getServiceImpl(), request.getArgs());
             return new RpcResponse(true, 0, result, null);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
@@ -53,9 +75,19 @@ public class ProviderBootStrap implements ApplicationContextAware {
         return rpcResponse;
     }
 
+    private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {
+        if(CollectionUtils.isEmpty(providerMetas)){
+            return null;
+        }
+        Optional<ProviderMeta> first = providerMetas.stream().filter(i -> i.getMethodSign().equals(methodSign)).findFirst();
+        return first.orElse(null);
+    }
+
+
+    @Deprecated
     private Method findMethod(Class<?> aClass, String methodName) {
         for (Method method : aClass.getMethods()) {
-            if(method.getName().equals(methodName)) {  // 有多个重名方法，
+            if(method.getName().equals(methodName)) {  // TODO 考虑有多个重名方法，
                 return method;
             }
         }

@@ -12,7 +12,23 @@ public class UserServiceImpl implements UserService {
     public User findById(long userId) {
         User user = new User();
         user.setId(userId);
-        user.setName("yezj");
+        user.setName("one, yezj");
+        return user;
+    }
+
+    @Override
+    public User findById(int userId) {
+        User user = new User();
+        user.setId(userId);
+        user.setName("two, yezj");
+        return user;
+    }
+
+    @Override
+    public User findById(long userId, String name) {
+        User user = new User();
+        user.setId(userId);
+        user.setName("three, "+name);
         return user;
     }
 }

@@ -4,6 +4,7 @@ import cc.yezj.rpc.core.model.request.RpcRequest;
 import cc.yezj.rpc.core.model.request.RpcResponse;
 import cc.yezj.rpc.core.provider.ProviderBootStrap;
 import cc.yezj.rpc.core.provider.ProviderConfig;
+import cc.yezj.rpc.demo.api.OrderService;
 import jakarta.annotation.Resource;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -41,16 +42,16 @@ public class RpcDemoProviderApplication {
 	@Bean
 	ApplicationRunner provideRunner(){
 		return x -> {
-			RpcRequest request = new RpcRequest();
+//			RpcRequest request = new RpcRequest();
 //			request.setService("cc.yezj.rpc.demo.api.UserService");
 //			request.setMethod("findById");
 //			request.setArgs(new Object[]{100});
 
-			request.setService("cc.yezj.rpc.demo.api.OrderService");
-			request.setMethod("queryOne");
-			request.setArgs(new Object[]{10});
-			RpcResponse invoke = invoke(request);
-			System.out.printf("return " + invoke);
+//			request.setService("cc.yezj.rpc.demo.api.OrderService");
+//			request.setMethodSign(OrderService.class.getMethod("queryOne", Long.class));
+//			request.setArgs(new Object[]{10});
+//			RpcResponse invoke = invoke(request);
+//			System.out.printf("return " + invoke);
 		};
 	}
 }

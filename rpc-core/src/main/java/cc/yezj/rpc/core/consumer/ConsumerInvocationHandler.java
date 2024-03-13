@@ -2,6 +2,7 @@ package cc.yezj.rpc.core.consumer;
 
 import cc.yezj.rpc.core.model.request.RpcRequest;
 import cc.yezj.rpc.core.model.request.RpcResponse;
+import cc.yezj.rpc.core.util.MethodUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.ConnectionPool;
@@ -28,7 +29,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         RpcRequest request = new RpcRequest();
         request.setService(service.getCanonicalName());
-        request.setMethod(method.getName());
+        request.setMethodSign(MethodUtil.methodSign(method));
         request.setArgs(args);
         //改成http请求
         RpcResponse response = post(request);
@@ -55,7 +56,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
     private RpcResponse post(RpcRequest request){
         String reqJson = JSON.toJSONString(request);
         Request httpRequest = new Request.Builder()
-                .url("http://localhost:8080")
+                .url("http://localhost:9001")
                 .post(RequestBody.create(reqJson, JSON_TYPE))
                 .build();
         try{
