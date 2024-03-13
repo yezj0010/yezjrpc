@@ -31,14 +31,30 @@ public class RpcDemoConsumerApplication {
     public ApplicationRunner consumerRunner(){
         System.out.printf("execute consumerRunner");
         return x -> {
-            User user = userService.findById(1L);
-            System.out.println(user);
-            User user2 = userService.findById(2, "llllll");
-            System.out.println(user2);
+//            User user = userService.findById(1L);
+//            System.out.println(user);
+//            User user2 = userService.findById(2, "llllll");
+//            System.out.println(user2);
+//              long id = userService.getId(123L);
+//            System.out.println(id);
+//            long gogogo = userService.getId(new User(99, "gogogo"));
+//            System.out.println(gogogo);
 //            Order order = orderService.queryOne(202);
 //            System.out.println(order);
 //            String test = orderService.test(404);
 //            System.out.println(test);
+
+            for(long id : userService.getIds()){
+                System.out.println(id);
+            }
+
+            for(long id : userService.getLgIds()){
+                System.out.println(id);
+            }
+
+            for(long id : userService.getIds(new int[]{9,23,5435})){
+                System.out.println(id);
+            }
         };
     }
 

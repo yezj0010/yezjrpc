@@ -2,8 +2,10 @@ package cc.yezj.rpc.core.model.request;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
-public class RpcRequest {
+public class RpcRequest implements Serializable {
     private String service;// 接口 cc.yezj.rpc.demo.api.UserService
 
     private String methodSign;// 方法 findById+方法个数+方法入参类型 MethodUtil.methodSign

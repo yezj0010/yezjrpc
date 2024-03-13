@@ -5,6 +5,7 @@ import cc.yezj.rpc.core.meta.ProviderMeta;
 import cc.yezj.rpc.core.model.request.RpcRequest;
 import cc.yezj.rpc.core.model.request.RpcResponse;
 import cc.yezj.rpc.core.util.MethodUtil;
+import cc.yezj.rpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.Data;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,15 +38,16 @@ public class ProviderBootStrap implements ApplicationContextAware {
     }
 
     private void getInterface(Object x){
-        Class<?>[] interfaces = x.getClass().getInterfaces();
-        Class<?> anInterface = interfaces[0];
-        Method[] methods = anInterface.getMethods();
-        for(Method method : methods){
-            if(MethodUtil.checkLocalMethod(method)){
-                continue;
+        Class<?>[] interfaces = x.getClass().getInterfaces();//兼容实现了多个接口
+        Arrays.stream(interfaces).forEach(anInterface -> {
+            Method[] methods = anInterface.getMethods();
+            for(Method method : methods){
+                if(MethodUtil.checkLocalMethod(method)){
+                    continue;
+                }
+                createProvider(anInterface, x, method);
             }
-            createProvider(anInterface, x, method);
-        }
+        });
     }
 
     private void createProvider(Class<?> anInterface, Object x, Method method) {
@@ -63,7 +66,8 @@ public class ProviderBootStrap implements ApplicationContextAware {
 
         try {
             ProviderMeta meta = findProviderMeta(providerMetas, methodSign);
-            Object result = meta.getMethod().invoke(meta.getServiceImpl(), request.getArgs());
+            Object args[] = processArgs(request.getArgs(), meta.getMethod().getParameterTypes());
+            Object result = meta.getMethod().invoke(meta.getServiceImpl(), args);
             return new RpcResponse(true, 0, result, null);
         } catch (InvocationTargetException e) {
             e.printStackTrace();
@@ -73,6 +77,16 @@ public class ProviderBootStrap implements ApplicationContextAware {
             rpcResponse.setException(new RuntimeException(e.getMessage()));
         }
         return rpcResponse;
+    }
+
+    private Object[] processArgs(Object[] args, Class<?>[] parameterTypes) {
+        if(args == null){
+            return null;
+        }
+        for(int i=0;i<args.length;i++){
+            args[i] = TypeUtils.cast(args[i], parameterTypes[i]);
+        }
+        return args;
     }
 
     private ProviderMeta findProviderMeta(List<ProviderMeta> providerMetas, String methodSign) {

@@ -3,7 +3,9 @@ package cc.yezj.rpc.core.consumer;
 import cc.yezj.rpc.core.model.request.RpcRequest;
 import cc.yezj.rpc.core.model.request.RpcResponse;
 import cc.yezj.rpc.core.util.MethodUtil;
+import cc.yezj.rpc.core.util.TypeUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
@@ -11,6 +13,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +34,24 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         request.setService(service.getCanonicalName());
         request.setMethodSign(MethodUtil.methodSign(method));
         request.setArgs(args);
+        System.out.println("request = " + request);
         //改成http请求
         RpcResponse response = post(request);
+        System.out.println("response = " + response);
         if(response != null && response.isSuccess() && response.getData() != null){
             if(response.getData() instanceof JSONObject){
                 return ((JSONObject) response.getData()).toJavaObject(method.getReturnType());
             }
-            return response.getData();
+//            if(response.getData() instanceof JSONArray jsonArray){
+//                Object[] array = jsonArray.toArray();
+//                Class<?> componentType = method.getReturnType().getComponentType();
+//                Object resultArray = Array.newInstance(componentType, array.length);
+//                for (int i = 0; i < array.length; i++) {
+//                    Array.set(resultArray, i, array[i]);
+//                }
+//                return resultArray;
+//            }
+            return TypeUtils.cast(response.getData(), method.getReturnType());
         } else {
             if(response != null && response.getException() != null){
                 throw new RuntimeException(response.getException());
