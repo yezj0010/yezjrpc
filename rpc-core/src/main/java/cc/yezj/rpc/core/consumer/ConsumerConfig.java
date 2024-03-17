@@ -33,9 +33,9 @@ public class ConsumerConfig {
     @Order(Integer.MIN_VALUE)
     ApplicationRunner CreateConsumerProxy(@Autowired ConsumerBootStrap consumerBootStrap){
         return x -> {
-//            System.out.println("CreateConsumerProxy start,.....");
+            System.out.println("CreateConsumerProxy start,.....");
             consumerBootStrap.start();
-//            System.out.println("CreateConsumerProxy end......");
+            System.out.println("CreateConsumerProxy end......");
         };
     }
 
