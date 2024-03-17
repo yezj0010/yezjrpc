@@ -1,9 +1,15 @@
 package cc.yezj.rpc.core.consumer;
 
 import cc.yezj.rpc.core.annotation.YezjConsumer;
+import cc.yezj.rpc.core.api.LoadBalancer;
+import cc.yezj.rpc.core.api.Router;
+import cc.yezj.rpc.core.api.RpcContext;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -13,13 +19,28 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-public class ConsumerBootStrap implements ApplicationContextAware {
+public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAware {
 
     ApplicationContext applicationContext;
+
+    Environment environment;
 
     private Map<String, Object> stub = new HashMap<>();
 
     public void start(){
+
+        Router router = applicationContext.getBean(Router.class);
+        LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        RpcContext rpcContext = new RpcContext();
+        rpcContext.setFilters(null);
+        rpcContext.setRouter(router);
+        rpcContext.setLoadBalancer(loadBalancer);
+        String providersInfo = environment.getProperty("yezjrpc.providers");
+        if(StringUtils.isEmpty(providersInfo)){
+            System.out.println("yezjrpc.providers is empty");
+        }
+        String[] providers = providersInfo.split(",");
+
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         for (String name : beanDefinitionNames) {
             Object bean = applicationContext.getBean(name);
@@ -30,7 +51,7 @@ public class ConsumerBootStrap implements ApplicationContextAware {
                     String classFullName = type.getCanonicalName();//拿到全限定名称
                     Object o = stub.get(classFullName);//获取代理类，判断是否存在
                     if (o == null) {
-                        o = createConsumer(type);
+                        o = createConsumer(type, rpcContext, List.of(providers));
                     }
                     i.setAccessible(true);
                     i.set(bean, o);
@@ -41,9 +62,9 @@ public class ConsumerBootStrap implements ApplicationContextAware {
         }
     }
 
-    private Object createConsumer(Class<?> serviceClass) {
+    private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<String> providers) {
         return Proxy.newProxyInstance(serviceClass.getClassLoader(),
-                new Class[]{serviceClass}, new ConsumerInvocationHandler(serviceClass));
+                new Class[]{serviceClass}, new ConsumerInvocationHandler(serviceClass, rpcContext, providers));
     }
 
     private List<Field> findAnnotatedField(Class<?> aClass) {

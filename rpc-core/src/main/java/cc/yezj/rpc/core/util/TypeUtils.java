@@ -22,6 +22,9 @@ public class TypeUtils {
 
         //处理map
         if(origin instanceof Map){
+            if(origin instanceof JSONObject){
+                return ((JSONObject) origin).toJavaObject(type);
+            }
             String jsonString = JSONObject.toJSONString(origin);
             return JSONObject.parseObject(jsonString, type);
         }

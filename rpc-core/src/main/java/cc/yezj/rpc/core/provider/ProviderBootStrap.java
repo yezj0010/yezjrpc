@@ -2,8 +2,8 @@ package cc.yezj.rpc.core.provider;
 
 import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.core.meta.ProviderMeta;
-import cc.yezj.rpc.core.model.request.RpcRequest;
-import cc.yezj.rpc.core.model.request.RpcResponse;
+import cc.yezj.rpc.core.api.RpcRequest;
+import cc.yezj.rpc.core.api.RpcResponse;
 import cc.yezj.rpc.core.util.MethodUtil;
 import cc.yezj.rpc.core.util.TypeUtils;
 import jakarta.annotation.PostConstruct;

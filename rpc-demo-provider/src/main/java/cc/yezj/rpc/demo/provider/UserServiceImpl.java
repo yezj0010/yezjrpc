@@ -3,16 +3,21 @@ package cc.yezj.rpc.demo.provider;
 import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.demo.api.User;
 import cc.yezj.rpc.demo.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
 @YezjProvider
 public class UserServiceImpl implements UserService {
+
+    @Autowired
+    Environment environment;
     @Override
     public User findById(long userId) {
         User user = new User();
         user.setId(userId);
-        user.setName("one, yezj");
+        user.setName("one, yezj,port="+environment.getProperty("server.port"));
         return user;
     }
 
@@ -20,7 +25,7 @@ public class UserServiceImpl implements UserService {
     public User findById(int userId) {
         User user = new User();
         user.setId(userId);
-        user.setName("two, yezj");
+        user.setName("two, yezj,port="+environment.getProperty("server.port"));
         return user;
     }
 

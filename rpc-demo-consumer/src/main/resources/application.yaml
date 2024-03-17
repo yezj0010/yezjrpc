@@ -4,3 +4,6 @@ server:
 logging:
   level:
     root: info
+
+yezjrpc:
+  providers: http://localhost:9101,http://localhost:9102

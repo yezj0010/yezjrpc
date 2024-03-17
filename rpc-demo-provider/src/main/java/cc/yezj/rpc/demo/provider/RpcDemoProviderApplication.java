@@ -1,10 +1,9 @@
 package cc.yezj.rpc.demo.provider;
 
-import cc.yezj.rpc.core.model.request.RpcRequest;
-import cc.yezj.rpc.core.model.request.RpcResponse;
+import cc.yezj.rpc.core.api.RpcRequest;
+import cc.yezj.rpc.core.api.RpcResponse;
 import cc.yezj.rpc.core.provider.ProviderBootStrap;
 import cc.yezj.rpc.core.provider.ProviderConfig;
-import cc.yezj.rpc.demo.api.OrderService;
 import jakarta.annotation.Resource;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -14,8 +13,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.sql.PreparedStatement;
 
 
 @SpringBootApplication

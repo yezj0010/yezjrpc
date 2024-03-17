@@ -1,5 +1,9 @@
 package cc.yezj.rpc.core.consumer;
 
+import cc.yezj.rpc.core.api.LoadBalancer;
+import cc.yezj.rpc.core.api.Router;
+import cc.yezj.rpc.core.cluster.RandomLoadBalancer;
+import cc.yezj.rpc.core.cluster.RoundRibonLoadBalancer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -26,5 +30,16 @@ public class ConsumerConfig {
             consumerBootStrap.start();
 //            System.out.println("CreateConsumerProxy end......");
         };
+    }
+
+    @Bean
+    public LoadBalancer loadBalancer(){
+//        return new RandomLoadBalancer();
+        return new RoundRibonLoadBalancer();
+    }
+
+    @Bean
+    public Router router(){
+        return Router.Default;
     }
 }

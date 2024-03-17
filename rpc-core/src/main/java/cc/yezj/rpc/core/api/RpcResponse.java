@@ -1,4 +1,4 @@
-package cc.yezj.rpc.core.model.request;
+package cc.yezj.rpc.core.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
