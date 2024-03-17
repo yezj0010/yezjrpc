@@ -6,4 +6,5 @@ logging:
     root: info
 
 yezjrpc:
-  providers: http://localhost:9101,http://localhost:9102
+   providers: http://localhost:9101,http://localhost:9102,http://localhost:9103
+#  providers: http://localhost:9101

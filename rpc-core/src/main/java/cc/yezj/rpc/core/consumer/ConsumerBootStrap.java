@@ -2,6 +2,7 @@ package cc.yezj.rpc.core.consumer;
 
 import cc.yezj.rpc.core.annotation.YezjConsumer;
 import cc.yezj.rpc.core.api.LoadBalancer;
+import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
 import lombok.Data;
@@ -9,7 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -35,11 +35,7 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
         rpcContext.setFilters(null);
         rpcContext.setRouter(router);
         rpcContext.setLoadBalancer(loadBalancer);
-        String providersInfo = environment.getProperty("yezjrpc.providers");
-        if(StringUtils.isEmpty(providersInfo)){
-            System.out.println("yezjrpc.providers is empty");
-        }
-        String[] providers = providersInfo.split(",");
+        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
 
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         for (String name : beanDefinitionNames) {
@@ -51,7 +47,7 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
                     String classFullName = type.getCanonicalName();//拿到全限定名称
                     Object o = stub.get(classFullName);//获取代理类，判断是否存在
                     if (o == null) {
-                        o = createConsumer(type, rpcContext, List.of(providers));
+                        o = createFromRegistry(type, rpcContext, rc);
                     }
                     i.setAccessible(true);
                     i.set(bean, o);
@@ -60,6 +56,12 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
                 }
             });
         }
+    }
+
+    private Object createFromRegistry(Class<?> type, RpcContext rpcContext, RegistryCenter rc) {
+        String serviceName = type.getCanonicalName();
+        List<String> providers = rc.fetchAll(serviceName);
+        return createConsumer(type, rpcContext, providers);
     }
 
     private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<String> providers) {
