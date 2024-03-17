@@ -52,13 +52,19 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void subscribe() {
+        public void subscribe(String service, ChangedListener changedListener) {
+
+        }
+
+        @Override
+        public void heartbeat() {
 
         }
     }
 
-    void subscribe();//TODO 比较复杂，需要监听zk变化
+    //TODO 比较复杂，需要监听zk变化
+    void subscribe(String service, ChangedListener changedListener);
 
     //TODO 心跳检测
-
+    void heartbeat();
 }

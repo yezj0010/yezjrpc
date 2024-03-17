@@ -1,10 +1,12 @@
 package cc.yezj.rpc.core.consumer;
 
 import cc.yezj.rpc.core.annotation.YezjConsumer;
+import cc.yezj.rpc.core.api.ChangedListener;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
+import cc.yezj.rpc.core.registry.Event;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAware {
@@ -60,8 +63,20 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> type, RpcContext rpcContext, RegistryCenter rc) {
         String serviceName = type.getCanonicalName();
-        List<String> providers = rc.fetchAll(serviceName);
+        List<String> providers = mapUrl(rc.fetchAll(serviceName));
+        rc.subscribe(serviceName, new ChangedListener() {
+            @Override
+            public void fire(Event event) {
+                providers.clear();
+                providers.addAll(mapUrl(event.getData()));
+            }
+        });
+
         return createConsumer(type, rpcContext, providers);
+    }
+
+    private List<String> mapUrl(List<String> nodes){
+        return nodes.stream().map(i -> "http://" + i.replace("_", ":") + "/").collect(Collectors.toList());//“/”加不加都可以
     }
 
     private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<String> providers) {

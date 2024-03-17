@@ -1,13 +1,17 @@
 package cc.yezj.rpc.core.registry;
 
+import cc.yezj.rpc.core.api.ChangedListener;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.AddWatchMode;
 import org.apache.zookeeper.CreateMode;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ZkRegistryCenter implements RegistryCenter {
 
@@ -75,11 +79,42 @@ public class ZkRegistryCenter implements RegistryCenter {
 
     @Override
     public List<String> fetchAll(String serviceName) {
-        return null;
+        String servicePath = "/" + serviceName;
+        try{
+            List<String> nodes = client.getChildren().forPath(servicePath);
+            System.out.println("fetchAll serviceName="+serviceName+",nodes="+nodes);
+            return nodes;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException();
+        }
     }
 
     @Override
-    public void subscribe() {
+    public void subscribe(String serviceName, ChangedListener changedListener) {
+        String servicePath = "/" + serviceName;
+        System.out.println("subscribe,service="+serviceName);
+        try{
+            final TreeCache cache = TreeCache.newBuilder(client, servicePath)
+                    .setCacheData(true)
+                    .setMaxDepth(2)
+                    .build();
+            cache.getListenable().addListener(
+                    (curator, event) -> {
+                        // 有任何节点变化，这段代码会执行。
+                        System.out.println("zk subscribe event:"+event);
+                        List<String> nodes = fetchAll(serviceName);
+                        changedListener.fire(new Event(nodes));
+                    }
+            );
+            cache.start();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void heartbeat() {
 
     }
 }
