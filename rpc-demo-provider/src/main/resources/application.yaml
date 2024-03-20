@@ -1,9 +1,5 @@
 server:
-  port: 8081
-
-logging:
-  level:
-    root: info
+  port: 9101
 
 yezjrpc:
   app:

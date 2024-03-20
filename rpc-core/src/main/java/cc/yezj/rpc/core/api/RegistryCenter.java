@@ -1,6 +1,7 @@
 package cc.yezj.rpc.core.api;
 
 import cc.yezj.rpc.core.meta.InstanceMeta;
+import cc.yezj.rpc.core.meta.ServiceMeta;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,12 +15,18 @@ public interface RegistryCenter {
 
     void stop();
 
-    void register(String service, InstanceMeta instance);
+    void register(ServiceMeta service, InstanceMeta instance);
 
-    void unregister(String service, InstanceMeta instance);
+    void unregister(ServiceMeta service, InstanceMeta instance);
 
     //consumer
-    List<InstanceMeta> fetchAll(String serviceName);
+    List<InstanceMeta> fetchAll(ServiceMeta serviceName);
+
+    //监听zk变化
+    void subscribe(ServiceMeta service, ChangedListener changedListener);
+
+    //TODO 心跳检测
+    void heartbeat();
 
     class StaticRegistryCenter implements RegistryCenter{
 
@@ -40,17 +47,17 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, InstanceMeta instance) {
+        public void register(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unregister(String service, InstanceMeta instance) {
+        public void unregister(ServiceMeta service, InstanceMeta instance) {
 
         }
 
         @Override
-        public List<InstanceMeta> fetchAll(String serviceName) {
+        public List<InstanceMeta> fetchAll(ServiceMeta serviceMeta) {
             return providers.stream().map(i -> {
                 String[] datas = i.split("_");
                 return InstanceMeta.http(datas[0], Integer.valueOf(datas[1]));
@@ -58,7 +65,7 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void subscribe(String service, ChangedListener changedListener) {
+        public void subscribe(ServiceMeta service, ChangedListener changedListener) {
 
         }
 
@@ -68,9 +75,5 @@ public interface RegistryCenter {
         }
     }
 
-    //TODO 比较复杂，需要监听zk变化
-    void subscribe(String service, ChangedListener changedListener);
 
-    //TODO 心跳检测
-    void heartbeat();
 }

@@ -7,9 +7,11 @@ import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.core.meta.InstanceMeta;
+import cc.yezj.rpc.core.meta.ServiceMeta;
 import cc.yezj.rpc.core.registry.Event;
 import cc.yezj.rpc.core.util.MethodUtil;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
@@ -28,6 +30,15 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
     ApplicationContext applicationContext;
 
     Environment environment;
+
+    @Value("${yezjrpc.app.id}")
+    private String app;
+
+    @Value("${yezjrpc.app.namespace}")
+    private String namespace;
+
+    @Value("${yezjrpc.app.env}")
+    private String env;
 
     private Map<String, Object> stub = new HashMap<>();
 
@@ -65,8 +76,9 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> type, RpcContext rpcContext, RegistryCenter rc) {
         String serviceName = type.getCanonicalName();
-        List<InstanceMeta> providers = rc.fetchAll(serviceName);
-        rc.subscribe(serviceName, new ChangedListener() {
+        ServiceMeta serviceMeta = ServiceMeta.builder().name(serviceName).app(app).namespace(namespace).env(env).build();
+        List<InstanceMeta> providers = rc.fetchAll(serviceMeta);
+        rc.subscribe(serviceMeta, new ChangedListener() {
             @Override
             public void fire(Event event) {
                 providers.clear();

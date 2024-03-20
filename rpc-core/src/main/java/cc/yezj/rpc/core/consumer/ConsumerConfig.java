@@ -3,24 +3,16 @@ package cc.yezj.rpc.core.consumer;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
-import cc.yezj.rpc.core.cluster.RandomLoadBalancer;
 import cc.yezj.rpc.core.cluster.RoundRibonLoadBalancer;
 import cc.yezj.rpc.core.registry.ZkRegistryCenter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import java.util.List;
-
 @Configuration
 public class ConsumerConfig {
-
-    @Value("${yezjrpc.providers}")
-    String servers;
-
     @Bean
     ConsumerBootStrap getConsumerBootStrap(){
         return new ConsumerBootStrap();

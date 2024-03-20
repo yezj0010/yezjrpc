@@ -4,6 +4,7 @@ import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.meta.ProviderMeta;
+import cc.yezj.rpc.core.meta.ServiceMeta;
 import cc.yezj.rpc.core.util.MethodUtil;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -41,6 +42,15 @@ public class ProviderBootStrap implements ApplicationContextAware {
     @Value("${server.port}")
     private String port;
 
+    @Value("${yezjrpc.app.id}")
+    private String app;
+
+    @Value("${yezjrpc.app.namespace}")
+    private String namespace;
+
+    @Value("${yezjrpc.app.env}")
+    private String env;
+
     private InstanceMeta instance;
 
     @PostConstruct
@@ -67,11 +77,13 @@ public class ProviderBootStrap implements ApplicationContextAware {
     }
 
     private void unRegisterService(String serviceName) {
-        rc.unregister(serviceName, this.instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder().name(serviceName).app(app).namespace(namespace).env(env).build();
+        rc.unregister(serviceMeta, this.instance);
     }
 
     private void registerService(String serviceName){
-        rc.register(serviceName, this.instance);
+        ServiceMeta serviceMeta = ServiceMeta.builder().name(serviceName).app(app).namespace(namespace).env(env).build();
+        rc.register(serviceMeta, this.instance);
     }
 
     private void getInterface(Object x){

@@ -3,18 +3,25 @@ package cc.yezj.rpc.core.registry;
 import cc.yezj.rpc.core.api.ChangedListener;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.meta.InstanceMeta;
+import cc.yezj.rpc.core.meta.ServiceMeta;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ZkRegistryCenter implements RegistryCenter {
+
+    @Value("${yezjrpc.zkServer}")
+    private String servers;
+
+    @Value("${yezjrpc.zkNamespace}")
+    private String namespace;
 
     private CuratorFramework client = null;
 
@@ -23,11 +30,11 @@ public class ZkRegistryCenter implements RegistryCenter {
         //backoff每次去探测的时间间隔是上一次的2倍
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         client = CuratorFrameworkFactory.builder()
-                .connectString("localhost:2181")//TODO 不能写死，待重构
+                .connectString(servers)//TODO 不能写死，待重构
                 .namespace("yezjrpc")
                 .retryPolicy(retryPolicy)
                 .build();
-        System.out.println(" ====> zk client start");
+        System.out.println(" ====> zk client start, server="+servers+", namespace="+namespace);
         client.start();
     }
 
@@ -43,8 +50,8 @@ public class ZkRegistryCenter implements RegistryCenter {
      * @param instance ip+端口
      */
     @Override
-    public void register(String service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+    public void register(ServiceMeta service, InstanceMeta instance) {
+        String servicePath = "/" + service.toPath();
         try {
             //创建服务的持久化节点，TODO 内容只是为了方便查看，无特殊作用
             if (client.checkExists().forPath(servicePath) == null) {
@@ -61,8 +68,8 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void unregister(String service, InstanceMeta instance) {
-        String servicePath = "/" + service;
+    public void unregister(ServiceMeta service, InstanceMeta instance) {
+        String servicePath = "/" + service.toPath();
         try {
             //判断服务节点是否存在
             if (client.checkExists().forPath(servicePath) == null) {
@@ -79,11 +86,11 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public List<InstanceMeta> fetchAll(String serviceName) {
-        String servicePath = "/" + serviceName;
+    public List<InstanceMeta> fetchAll(ServiceMeta serviceMeta) {
+        String servicePath = "/" + serviceMeta.toPath();
         try{
             List<String> nodes = client.getChildren().forPath(servicePath);
-            System.out.println("fetchAll serviceName="+serviceName+",nodes="+nodes);
+            System.out.println("fetchAll serviceName="+serviceMeta.getName()+",nodes="+nodes);
             return toInstanceMeta(nodes);
         }catch (Exception e){
             e.printStackTrace();
@@ -99,9 +106,9 @@ public class ZkRegistryCenter implements RegistryCenter {
     }
 
     @Override
-    public void subscribe(String serviceName, ChangedListener changedListener) {
-        String servicePath = "/" + serviceName;
-        System.out.println("subscribe,service="+serviceName);
+    public void subscribe(ServiceMeta serviceMeta, ChangedListener changedListener) {
+        String servicePath = "/" + serviceMeta.toPath();
+        System.out.println("subscribe,service="+serviceMeta.toPath());
         try{
             final TreeCache cache = TreeCache.newBuilder(client, servicePath)
                     .setCacheData(true)
@@ -111,7 +118,7 @@ public class ZkRegistryCenter implements RegistryCenter {
                     (curator, event) -> {
                         // 有任何节点变化，这段代码会执行。
                         System.out.println("zk subscribe event:"+event);
-                        List<InstanceMeta> instanceMetas = fetchAll(serviceName);
+                        List<InstanceMeta> instanceMetas = fetchAll(serviceMeta);
                         changedListener.fire(new Event(instanceMetas));
                     }
             );
