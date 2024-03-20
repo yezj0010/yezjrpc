@@ -18,6 +18,11 @@ public class ProviderConfig {
     }
 
     @Bean
+    ProviderInvoker providerInvoker(@Autowired ProviderBootStrap providerBootStrap){
+        return new ProviderInvoker(providerBootStrap);
+    }
+
+    @Bean
     @Order(Integer.MIN_VALUE)
     ApplicationRunner CreateProviderBootStrapRunner(@Autowired ProviderBootStrap providerBootStrap){
         return x -> {

@@ -7,6 +7,7 @@ import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.core.registry.Event;
+import cc.yezj.rpc.core.util.MethodUtil;
 import lombok.Data;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,7 +16,6 @@ import org.springframework.core.env.Environment;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();
         for (String name : beanDefinitionNames) {
             Object bean = applicationContext.getBean(name);
-            List<Field> annotatedField = findAnnotatedField(bean.getClass());
+            List<Field> annotatedField = MethodUtil.findAnnotatedField(bean.getClass(), YezjConsumer.class);
             annotatedField.stream().forEach(i -> {
                 try{
                     Class<?> type = i.getType();
@@ -82,19 +82,5 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
     private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<String> providers) {
         return Proxy.newProxyInstance(serviceClass.getClassLoader(),
                 new Class[]{serviceClass}, new ConsumerInvocationHandler(serviceClass, rpcContext, providers));
-    }
-
-    private List<Field> findAnnotatedField(Class<?> aClass) {
-        List<Field> result = new ArrayList<>();
-        while(aClass != null){
-            Field[] declaredFields = aClass.getDeclaredFields();
-            for(Field ff : declaredFields){
-                if(ff.isAnnotationPresent(YezjConsumer.class)){
-                    result.add(ff);
-                }
-            }
-            aClass = aClass.getSuperclass();
-        }
-        return result;
     }
 }

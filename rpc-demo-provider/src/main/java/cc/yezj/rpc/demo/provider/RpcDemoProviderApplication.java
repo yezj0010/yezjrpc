@@ -4,6 +4,7 @@ import cc.yezj.rpc.core.api.RpcRequest;
 import cc.yezj.rpc.core.api.RpcResponse;
 import cc.yezj.rpc.core.provider.ProviderBootStrap;
 import cc.yezj.rpc.core.provider.ProviderConfig;
+import cc.yezj.rpc.core.provider.ProviderInvoker;
 import jakarta.annotation.Resource;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RpcDemoProviderApplication {
 	@Resource
-	private ProviderBootStrap providerBootStrap;
+	private ProviderInvoker providerInvoker;
 
 
 	public static void main(String[] args) {
@@ -31,7 +32,7 @@ public class RpcDemoProviderApplication {
 	//使用HTTP + JSON 来实现序列化和通信
 	@RequestMapping("/")
 	public RpcResponse invoke(@RequestBody RpcRequest request) {
-		return providerBootStrap.invoke(request);
+		return providerInvoker.invoke(request);
 	}
 
 	@Bean

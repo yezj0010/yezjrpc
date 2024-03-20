@@ -20,14 +20,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ConsumerInvocationHandler implements InvocationHandler {
-
-    private static final MediaType JSON_TYPE = MediaType.get("application/json;charset=utf-8");
-
     private Class<?> service;
 
     private RpcContext rpcContext;
 
     private List<String> providers;
+
+    HttpInvoker httpInvoker = new OKHttpInvoker();
 
     public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<String> providers) {
         this.service = service;
@@ -48,7 +47,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         System.out.println("loadBalancer.choice => "+url);
 
         //改成http请求
-        RpcResponse response = post(request, url);
+        RpcResponse<?> response = httpInvoker.post(request, url);
         System.out.println("response = " + response);
         if(response != null && response.isSuccess() && response.getData() != null){
 //            if(response.getData() instanceof JSONObject){
@@ -63,26 +62,6 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         }
     }
 
-    OkHttpClient client = new OkHttpClient.Builder()
-            .connectionPool(new ConnectionPool(16, 60, TimeUnit.SECONDS))
-            .readTimeout(1, TimeUnit.SECONDS)
-            .writeTimeout(1, TimeUnit.SECONDS)
-            .connectTimeout(1, TimeUnit.SECONDS)
-            .build();
 
-    private RpcResponse post(RpcRequest request, String url){
-        String reqJson = JSON.toJSONString(request);
-        Request httpRequest = new Request.Builder()
-                .url(url) //TODO 使用负载均衡替换
-                .post(RequestBody.create(reqJson, JSON_TYPE))
-                .build();
-        try{
-            String result = client.newCall(httpRequest).execute().body().string();
-            RpcResponse response = JSON.parseObject(result, RpcResponse.class);
-            return response;
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return null;
-    }
+
 }

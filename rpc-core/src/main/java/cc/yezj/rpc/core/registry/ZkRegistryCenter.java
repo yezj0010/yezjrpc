@@ -7,11 +7,9 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.AddWatchMode;
 import org.apache.zookeeper.CreateMode;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ZkRegistryCenter implements RegistryCenter {
 
