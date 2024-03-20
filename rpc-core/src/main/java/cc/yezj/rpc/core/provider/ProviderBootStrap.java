@@ -2,6 +2,7 @@ package cc.yezj.rpc.core.provider;
 
 import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.core.api.RegistryCenter;
+import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.meta.ProviderMeta;
 import cc.yezj.rpc.core.util.MethodUtil;
 import jakarta.annotation.PostConstruct;
@@ -40,7 +41,7 @@ public class ProviderBootStrap implements ApplicationContextAware {
     @Value("${server.port}")
     private String port;
 
-    private String instance;
+    private InstanceMeta instance;
 
     @PostConstruct
     public void init(){
@@ -54,7 +55,7 @@ public class ProviderBootStrap implements ApplicationContextAware {
     public void start(){//放到ApplicationRunner的时候执行，才能保证服务正常启动之后才进行注册，否则客户端调用会报错服务问题
         //注册到zookeeper
         String ip = InetAddress.getLocalHost().getHostAddress();
-        this.instance = ip + "_" + port;
+        this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
         rc.start();//注意顺序，先启动，再注册
         skeleton.keySet().forEach(this::registerService);
     }

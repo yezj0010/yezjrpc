@@ -1,6 +1,9 @@
 package cc.yezj.rpc.core.api;
 
+import cc.yezj.rpc.core.meta.InstanceMeta;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 注册中心
@@ -11,12 +14,12 @@ public interface RegistryCenter {
 
     void stop();
 
-    void register(String service, String instance);
+    void register(String service, InstanceMeta instance);
 
-    void unregister(String service, String instance);
+    void unregister(String service, InstanceMeta instance);
 
     //consumer
-    List<String> fetchAll(String serviceName);
+    List<InstanceMeta> fetchAll(String serviceName);
 
     class StaticRegistryCenter implements RegistryCenter{
 
@@ -37,18 +40,21 @@ public interface RegistryCenter {
         }
 
         @Override
-        public void register(String service, String instance) {
+        public void register(String service, InstanceMeta instance) {
 
         }
 
         @Override
-        public void unregister(String service, String instance) {
+        public void unregister(String service, InstanceMeta instance) {
 
         }
 
         @Override
-        public List<String> fetchAll(String serviceName) {
-            return providers;
+        public List<InstanceMeta> fetchAll(String serviceName) {
+            return providers.stream().map(i -> {
+                String[] datas = i.split("_");
+                return InstanceMeta.http(datas[0], Integer.valueOf(datas[1]));
+            }).collect(Collectors.toList());
         }
 
         @Override

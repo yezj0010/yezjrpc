@@ -6,6 +6,7 @@ import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
+import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.registry.Event;
 import cc.yezj.rpc.core.util.MethodUtil;
 import lombok.Data;
@@ -64,23 +65,23 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
 
     private Object createFromRegistry(Class<?> type, RpcContext rpcContext, RegistryCenter rc) {
         String serviceName = type.getCanonicalName();
-        List<String> providers = mapUrl(rc.fetchAll(serviceName));
+        List<InstanceMeta> providers = rc.fetchAll(serviceName);
         rc.subscribe(serviceName, new ChangedListener() {
             @Override
             public void fire(Event event) {
                 providers.clear();
-                providers.addAll(mapUrl(event.getData()));
+                providers.addAll(event.getData());
             }
         });
 
         return createConsumer(type, rpcContext, providers);
     }
 
-    private List<String> mapUrl(List<String> nodes){
-        return nodes.stream().map(i -> "http://" + i.replace("_", ":") + "/").collect(Collectors.toList());//“/”加不加都可以
+    private List<String> mapUrl(List<InstanceMeta> nodes){
+        return nodes.stream().map(i -> "http://" + i.getHost()+":"+i.getPort() + "/").collect(Collectors.toList());//“/”加不加都可以
     }
 
-    private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<String> providers) {
+    private Object createConsumer(Class<?> serviceClass, RpcContext rpcContext, List<InstanceMeta> providers) {
         return Proxy.newProxyInstance(serviceClass.getClassLoader(),
                 new Class[]{serviceClass}, new ConsumerInvocationHandler(serviceClass, rpcContext, providers));
     }

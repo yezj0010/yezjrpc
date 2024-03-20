@@ -5,6 +5,7 @@ import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.core.api.RpcRequest;
 import cc.yezj.rpc.core.api.RpcResponse;
+import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.util.MethodUtil;
 import cc.yezj.rpc.core.util.TypeUtils;
 import com.alibaba.fastjson.JSON;
@@ -24,11 +25,11 @@ public class ConsumerInvocationHandler implements InvocationHandler {
 
     private RpcContext rpcContext;
 
-    private List<String> providers;
+    private List<InstanceMeta> providers;
 
     HttpInvoker httpInvoker = new OKHttpInvoker();
 
-    public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<String> providers) {
+    public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<InstanceMeta> providers) {
         this.service = service;
         this.rpcContext = rpcContext;
         this.providers = providers;
@@ -42,17 +43,14 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         request.setArgs(args);
         System.out.println("request = " + request);
 
-        List<String> urls = rpcContext.getRouter().route(providers);
-        String url = (String) rpcContext.getLoadBalancer().choice(urls);
-        System.out.println("loadBalancer.choice => "+url);
+        List<String> nodes = rpcContext.getRouter().route(providers);
+        InstanceMeta instanceMeta = (InstanceMeta) rpcContext.getLoadBalancer().choice(nodes);
+        System.out.println("loadBalancer.choice => "+instanceMeta);
 
         //改成http请求
-        RpcResponse<?> response = httpInvoker.post(request, url);
+        RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
         System.out.println("response = " + response);
         if(response != null && response.isSuccess() && response.getData() != null){
-//            if(response.getData() instanceof JSONObject){
-//                return ((JSONObject) response.getData()).toJavaObject(method.getReturnType());
-//            }
             return TypeUtils.cast(response.getData(), method.getReturnType());
         } else {
             if(response != null && response.getException() != null){
