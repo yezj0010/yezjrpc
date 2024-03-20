@@ -51,6 +51,7 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
                     Object o = stub.get(classFullName);//获取代理类，判断是否存在
                     if (o == null) {
                         o = createFromRegistry(type, rpcContext, rc);
+                        stub.put(classFullName, o);
                     }
                     i.setAccessible(true);
                     i.set(bean, o);
