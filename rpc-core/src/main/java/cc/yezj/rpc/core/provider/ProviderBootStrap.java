@@ -36,6 +36,9 @@ public class ProviderBootStrap implements ApplicationContextAware {
     @Resource
     private ApplicationContext applicationContext;
 
+    @Resource
+    private RegistryCenter rc;
+
     /**
      * 接口全限定名 - List<ProviderMeta>
      */
@@ -59,11 +62,13 @@ public class ProviderBootStrap implements ApplicationContextAware {
         String ip = InetAddress.getLocalHost().getHostAddress();
         this.instance = ip + "_" + port;
         skeleton.keySet().forEach(this::registerService);
+        rc.start();
     }
 
     @PreDestroy
     public void stop(){
         skeleton.keySet().forEach(this::unRegisterService);
+        rc.stop();
     }
 
     private void unRegisterService(String serviceName) {
@@ -72,7 +77,6 @@ public class ProviderBootStrap implements ApplicationContextAware {
     }
 
     private void registerService(String serviceName){
-        RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
         rc.register(serviceName, this.instance);
     }
 
