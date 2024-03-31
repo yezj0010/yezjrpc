@@ -5,6 +5,7 @@ import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.cluster.RoundRibonLoadBalancer;
 import cc.yezj.rpc.core.registry.ZkRegistryCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 @Configuration
+@Slf4j
 public class ConsumerConfig {
     @Bean
     ConsumerBootStrap getConsumerBootStrap(){
@@ -26,9 +28,9 @@ public class ConsumerConfig {
     @Order(Integer.MIN_VALUE)
     ApplicationRunner CreateConsumerProxy(@Autowired ConsumerBootStrap consumerBootStrap){
         return x -> {
-            System.out.println("CreateConsumerProxy start,.....");
+            log.info("CreateConsumerProxy start,.....");
             consumerBootStrap.start();
-            System.out.println("CreateConsumerProxy end......");
+            log.info("CreateConsumerProxy end......");
         };
     }
 

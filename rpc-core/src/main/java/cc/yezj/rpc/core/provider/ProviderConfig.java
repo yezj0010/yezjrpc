@@ -3,6 +3,7 @@ package cc.yezj.rpc.core.provider;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.consumer.ConsumerBootStrap;
 import cc.yezj.rpc.core.registry.ZkRegistryCenter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 @Configuration
+@Slf4j
 public class ProviderConfig {
 
     @Bean
@@ -26,9 +28,9 @@ public class ProviderConfig {
     @Order(Integer.MIN_VALUE)
     ApplicationRunner CreateProviderBootStrapRunner(@Autowired ProviderBootStrap providerBootStrap){
         return x -> {
-            System.out.println("CreateProviderBootStrapRunner start,.....");
+            log.info("CreateProviderBootStrapRunner start,.....");
             providerBootStrap.start();
-            System.out.println("CreateProviderBootStrapRunner end......");
+            log.info("CreateProviderBootStrapRunner end......");
         };
     }
 

@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
@@ -28,7 +29,7 @@ public class RpcDemoConsumerApplication {
     private OrderService orderService;
 
     @RequestMapping("/")
-    public User invoke(int id){
+    public User invoke(@RequestParam("id") int id){
         return userService.findById(id);
     }
 

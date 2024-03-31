@@ -8,3 +8,8 @@ yezjrpc:
     env: dev
   zkServer: localhost:2181
   zkNamespace: yezj
+
+logging:
+  level:
+    root: info
+    cc.yezj.rpc: debug

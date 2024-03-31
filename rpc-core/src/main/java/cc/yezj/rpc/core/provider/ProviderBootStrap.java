@@ -11,6 +11,7 @@ import jakarta.annotation.PreDestroy;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -25,6 +26,7 @@ import java.util.Map;
 /**
  * 服务提供者启动类
  */
+@Slf4j
 @Data
 public class ProviderBootStrap implements ApplicationContextAware {
 
@@ -109,7 +111,7 @@ public class ProviderBootStrap implements ApplicationContextAware {
         providerMeta.setMethod(method);
         providerMeta.setMethodSign(MethodUtil.methodSign(method));
         providerMeta.setServiceImpl(x);
-        System.out.println("create providerMeta="+providerMeta);
+        log.info("create providerMeta="+providerMeta);
         skeleton.add(anInterface.getCanonicalName(), providerMeta);
     }
 

@@ -9,6 +9,7 @@ import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.util.MethodUtil;
 import cc.yezj.rpc.core.util.TypeUtils;
 import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.ConnectionPool;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -20,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class ConsumerInvocationHandler implements InvocationHandler {
     private Class<?> service;
 
@@ -41,15 +43,15 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         request.setService(service.getCanonicalName());
         request.setMethodSign(MethodUtil.methodSign(method));
         request.setArgs(args);
-        System.out.println("request = " + request);
+        log.debug("request = " + request);
 
         List<String> nodes = rpcContext.getRouter().route(providers);
         InstanceMeta instanceMeta = (InstanceMeta) rpcContext.getLoadBalancer().choice(nodes);
-        System.out.println("loadBalancer.choice => "+instanceMeta);
+        log.debug("loadBalancer.choice => "+instanceMeta);
 
         //改成http请求
         RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
-        System.out.println("response = " + response);
+        log.debug("response = " + response);
         if(response != null && response.isSuccess() && response.getData() != null){
             return TypeUtils.cast(response.getData(), method.getReturnType());
         } else {
