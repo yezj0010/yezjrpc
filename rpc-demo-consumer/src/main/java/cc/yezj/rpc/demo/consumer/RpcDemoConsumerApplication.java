@@ -35,6 +35,11 @@ public class RpcDemoConsumerApplication {
         return userService.findById(id);
     }
 
+    @RequestMapping("/find")
+    public User find(@RequestParam("timeout") int timeout){
+        return userService.find(timeout);
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(RpcDemoConsumerApplication.class, args);
     }
@@ -42,7 +47,10 @@ public class RpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumer_runner() {
         return x -> {
-            testAll();
+            long start = System.currentTimeMillis();
+            userService.find(1200);
+            System.out.println("cc.yezj.rpc.demo.api.UserService.find, use = "+(System.currentTimeMillis()-start));
+//            testAll();
         };
     }
 

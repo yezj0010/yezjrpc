@@ -5,5 +5,5 @@ import cc.yezj.rpc.core.api.RpcResponse;
 
 public interface HttpInvoker {
 
-    RpcResponse<Object> post(RpcRequest rpcRequest, String url);
+    RpcResponse<Object> post(RpcRequest rpcRequest, String url) throws Exception;
 }

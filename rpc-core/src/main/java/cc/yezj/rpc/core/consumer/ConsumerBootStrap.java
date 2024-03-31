@@ -41,10 +41,15 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
     @Value("${yezjrpc.app.env}")
     private String env;
 
+    @Value("${yezjrpc.app.retries}")
+    private int retries;
+
+    @Value("${yezjrpc.app.timeout}")
+    private int timeout;
+
     private Map<String, Object> stub = new HashMap<>();
 
     public void start(){
-
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
         List<Filter> filters = applicationContext.getBeansOfType(Filter.class).values().stream().toList();
@@ -52,6 +57,8 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
         rpcContext.setFilters(filters);
         rpcContext.setRouter(router);
         rpcContext.setLoadBalancer(loadBalancer);
+        rpcContext.getParameters().put("app.retries", String.valueOf(retries));
+        rpcContext.getParameters().put("app.timeout", String.valueOf(timeout));
         RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
 
         String[] beanDefinitionNames = applicationContext.getBeanDefinitionNames();

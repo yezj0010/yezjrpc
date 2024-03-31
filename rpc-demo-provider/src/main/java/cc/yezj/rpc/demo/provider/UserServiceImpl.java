@@ -100,4 +100,16 @@ public class UserServiceImpl implements UserService {
         return new User(100, "JH100");
     }
 
+    @Override
+    public User find(int timeout) {
+        String property = environment.getProperty("server.port");
+        if("9101".equals(property)){
+            try {
+                Thread.sleep(timeout);
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+        }
+        return new User(1001, "jiajiajia  "+property);
+    }
 }

@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,12 +33,13 @@ public class ConsumerInvocationHandler implements InvocationHandler {
 
     private List<InstanceMeta> providers;
 
-    HttpInvoker httpInvoker = new OKHttpInvoker();
+    HttpInvoker httpInvoker;
 
-    public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<InstanceMeta> providers) {
+    public ConsumerInvocationHandler(Class<?> service, RpcContext rpcContext, List<InstanceMeta> providers){
         this.service = service;
         this.rpcContext = rpcContext;
         this.providers = providers;
+        this.httpInvoker = new OKHttpInvoker(Integer.parseInt(rpcContext.getParameters().getOrDefault("app.timeout", "1000")));
     }
 
     @Override
@@ -52,33 +54,45 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         request.setArgs(args);
         log.debug("request = " + request);
 
-        for (Filter filter : rpcContext.getFilters()) {
-            Object preResult = filter.preFilter(request);
-            if(preResult != null){
-                log.debug(filter.getClass().getName() + ", preFilterResult:"+preResult);
-                return preResult;
+        int retry = Integer.parseInt(rpcContext.getParameters().getOrDefault("app.retries", "2"));
+        while(retry > 0) {
+            try {
+                log.debug("ConsumerInvocationHandler.invoke, retry="+retry);
+                for (Filter filter : rpcContext.getFilters()) {
+                    Object preResult = filter.preFilter(request);
+                    if (preResult != null) {
+                        log.debug(filter.getClass().getName() + ", preFilterResult:" + preResult);
+                        return preResult;
+                    }
+                }
+
+                List<String> nodes = rpcContext.getRouter().route(providers);
+                InstanceMeta instanceMeta = (InstanceMeta) rpcContext.getLoadBalancer().choice(nodes);
+                log.debug("loadBalancer.choice => " + instanceMeta);
+
+                //改成http请求
+                RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
+                log.debug("response = " + response);
+
+                Object result = castReturnResult(method, response);
+
+                //调用后过滤
+                for (Filter filter : rpcContext.getFilters()) {
+                    Object filterResult = filter.postFilter(request, response, result);
+                    if (filterResult != null) {
+                        return filterResult;//TODO 这里逻辑好像有问题，一旦一个过滤器生效了，后面的过滤器就没意义了。
+                    }
+                }
+                return result;
+            } catch (SocketTimeoutException sto) {
+                retry--;
+                log.error("timeout", sto);
+            } catch (Exception e) {
+                log.error("error", e);
+                break;
             }
         }
-
-        List<String> nodes = rpcContext.getRouter().route(providers);
-        InstanceMeta instanceMeta = (InstanceMeta) rpcContext.getLoadBalancer().choice(nodes);
-        log.debug("loadBalancer.choice => "+instanceMeta);
-
-        //改成http请求
-        RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
-        log.debug("response = " + response);
-
-        Object result = castReturnResult(method, response);
-
-        //调用后过滤
-        for (Filter filter : rpcContext.getFilters()) {
-            Object filterResult = filter.postFilter(request, response, result);
-            if(filterResult != null){
-                return filterResult;//TODO 这里逻辑好像有问题，一旦一个过滤器生效了，后面的过滤器就没意义了。
-            }
-        }
-
-        return result;
+        return null;
     }
 
     @Nullable

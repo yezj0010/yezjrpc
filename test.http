@@ -27,3 +27,8 @@ Content-Type: application/json
 "method": "test",
 "args": [404]
 }
+
+### 测试
+GET http://localhost:8081/find?timeout=1200
+
+
