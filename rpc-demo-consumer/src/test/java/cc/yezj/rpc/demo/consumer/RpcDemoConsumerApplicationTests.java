@@ -15,7 +15,8 @@ class RpcDemoConsumerApplicationTests {
 
     @BeforeAll
     static void init(){
-        context = SpringApplication.run(RpcDemoProviderApplication.class, "--server.port=9104");
+        context = SpringApplication.run(RpcDemoProviderApplication.class,
+                "--server.port=9104", "--logging.level.cc.yezj.rpc=debug");
     }
 
     @Test

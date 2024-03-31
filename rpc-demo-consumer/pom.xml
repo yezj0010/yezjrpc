@@ -61,7 +61,7 @@
             <groupId>cc.yezj</groupId>
             <artifactId>rpc-demo-provider</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-<!--            <scope>test</scope>-->
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
