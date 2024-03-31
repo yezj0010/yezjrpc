@@ -1,10 +1,5 @@
 server:
-  port: 8082
-
-logging:
-  level:
-    root: info
-    cc.yezj.rpc: info
+  port: 9190
 
 yezjrpc:
   app:
@@ -13,3 +8,8 @@ yezjrpc:
     env: dev
   zkServer: localhost:2182
   zkNamespace: yezj
+
+logging:
+  level:
+    root: info
+    cc.yezj.rpc: debug

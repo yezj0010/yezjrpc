@@ -20,7 +20,7 @@ public class InstanceMeta {
     private String context;//路径的上下文 就是web服务路径
 
     private boolean status;//服务端状态， online or offline
-    private Map<String, String> parameters;
+    private Map<String, String> parameters; //可以包括IDC机房所在地，等属性
 
     InstanceMeta(String scheme, String host, Integer port, String context){
         this.scheme = scheme;
