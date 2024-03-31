@@ -115,15 +115,4 @@ public class ProviderBootStrap implements ApplicationContextAware {
         skeleton.add(anInterface.getCanonicalName(), providerMeta);
     }
 
-
-    @Deprecated
-    private Method findMethod(Class<?> aClass, String methodName) {
-        for (Method method : aClass.getMethods()) {
-            if(method.getName().equals(methodName)) {  // TODO 考虑有多个重名方法，
-                return method;
-            }
-        }
-        return null;
-    }
-
 }

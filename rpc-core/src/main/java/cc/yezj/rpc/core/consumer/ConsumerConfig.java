@@ -6,6 +6,7 @@ import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.cluster.RoundRibonLoadBalancer;
 import cc.yezj.rpc.core.filter.LocalCacheFilter;
+import cc.yezj.rpc.core.filter.MockFilter;
 import cc.yezj.rpc.core.registry.ZkRegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +50,18 @@ public class ConsumerConfig {
 
     @Bean
     public Filter filter(){
-        return new LocalCacheFilter();
+        return Filter.Default;
     }
+
+//    @Bean
+//    public Filter filter(){
+//        return new LocalCacheFilter();
+//    }
+
+//    @Bean
+//    public Filter filter2(){
+//        return new MockFilter();
+//    }
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public RegistryCenter consumerRC(){
