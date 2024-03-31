@@ -1,5 +1,6 @@
 package cc.yezj.rpc.core.consumer;
 
+import cc.yezj.rpc.core.api.Filter;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
@@ -15,6 +16,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -49,6 +51,14 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         request.setArgs(args);
         log.debug("request = " + request);
 
+        for (Filter filter : rpcContext.getFilters()) {
+            Object preResult = filter.preFilter(request);
+            if(preResult != null){
+                log.debug(filter.getClass().getName() + ", preFilterResult:"+preResult);
+                return preResult;
+            }
+        }
+
         List<String> nodes = rpcContext.getRouter().route(providers);
         InstanceMeta instanceMeta = (InstanceMeta) rpcContext.getLoadBalancer().choice(nodes);
         log.debug("loadBalancer.choice => "+instanceMeta);
@@ -56,6 +66,22 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         //改成http请求
         RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
         log.debug("response = " + response);
+
+        Object result = castReturnResult(method, response);
+
+        //调用后过滤
+        for (Filter filter : rpcContext.getFilters()) {
+            Object filterResult = filter.postFilter(request, response, result);
+            if(filterResult != null){
+                return filterResult;//TODO 这里逻辑好像有问题，一旦一个过滤器生效了，后面的过滤器就没意义了。
+            }
+        }
+
+        return result;
+    }
+
+    @Nullable
+    private static Object castReturnResult(Method method, RpcResponse<?> response) {
         if(response != null && response.isSuccess() && response.getData() != null){
             return TypeUtils.castMethodResult(method, response.getData());
         } else {
@@ -65,7 +91,6 @@ public class ConsumerInvocationHandler implements InvocationHandler {
             return null;
         }
     }
-
 
 
 }

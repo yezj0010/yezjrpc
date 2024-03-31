@@ -4,7 +4,7 @@ server:
 logging:
   level:
     root: info
-    cc.yezj.rpc: debug
+    cc.yezj.rpc: info
 
 yezjrpc:
   app:

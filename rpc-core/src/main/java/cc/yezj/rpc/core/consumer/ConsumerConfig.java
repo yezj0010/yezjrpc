@@ -1,9 +1,11 @@
 package cc.yezj.rpc.core.consumer;
 
+import cc.yezj.rpc.core.api.Filter;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.cluster.RoundRibonLoadBalancer;
+import cc.yezj.rpc.core.filter.LocalCacheFilter;
 import cc.yezj.rpc.core.registry.ZkRegistryCenter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,11 @@ public class ConsumerConfig {
     @Bean
     public Router router(){
         return Router.Default;
+    }
+
+    @Bean
+    public Filter filter(){
+        return new LocalCacheFilter();
     }
 
     @Bean(initMethod = "start", destroyMethod = "stop")

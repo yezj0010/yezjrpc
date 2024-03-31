@@ -2,6 +2,7 @@ package cc.yezj.rpc.core.consumer;
 
 import cc.yezj.rpc.core.annotation.YezjConsumer;
 import cc.yezj.rpc.core.api.ChangedListener;
+import cc.yezj.rpc.core.api.Filter;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.Router;
@@ -46,8 +47,9 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
 
         Router router = applicationContext.getBean(Router.class);
         LoadBalancer loadBalancer = applicationContext.getBean(LoadBalancer.class);
+        List<Filter> filters = applicationContext.getBeansOfType(Filter.class).values().stream().toList();
         RpcContext rpcContext = new RpcContext();
-        rpcContext.setFilters(null);
+        rpcContext.setFilters(filters);
         rpcContext.setRouter(router);
         rpcContext.setLoadBalancer(loadBalancer);
         RegistryCenter rc = applicationContext.getBean(RegistryCenter.class);
