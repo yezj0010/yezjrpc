@@ -4,6 +4,7 @@ import cc.yezj.rpc.core.api.Filter;
 import cc.yezj.rpc.core.api.LoadBalancer;
 import cc.yezj.rpc.core.api.Router;
 import cc.yezj.rpc.core.api.RpcContext;
+import cc.yezj.rpc.core.api.RpcException;
 import cc.yezj.rpc.core.api.RpcRequest;
 import cc.yezj.rpc.core.api.RpcResponse;
 import cc.yezj.rpc.core.meta.InstanceMeta;
@@ -86,7 +87,10 @@ public class ConsumerInvocationHandler implements InvocationHandler {
             return TypeUtils.castMethodResult(method, response.getData());
         } else {
             if(response != null && response.getException() != null){
-                throw new RuntimeException(response.getException());
+                if(response.getException() instanceof RpcException exception){
+                    throw exception;
+                }
+                throw new RpcException(response.getException(), RpcException.INTER_ERROR_EX);
             }
             return null;
         }

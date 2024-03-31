@@ -1,5 +1,6 @@
 package cc.yezj.rpc.core.provider;
 
+import cc.yezj.rpc.core.api.RpcException;
 import cc.yezj.rpc.core.api.RpcRequest;
 import cc.yezj.rpc.core.api.RpcResponse;
 import cc.yezj.rpc.core.meta.ProviderMeta;
@@ -36,11 +37,11 @@ public class ProviderInvoker {
             Object result = meta.getMethod().invoke(meta.getServiceImpl(), args);
             return new RpcResponse(true, 0, result, null);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
-            rpcResponse.setException(new RuntimeException(e.getTargetException().getMessage()));
+//            e.printStackTrace();
+            rpcResponse.setException(new RpcException(e.getTargetException().getMessage()));
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            rpcResponse.setException(new RuntimeException(e.getMessage()));
+//            e.printStackTrace();
+            rpcResponse.setException(new RpcException(e.getMessage()));
         }
         return rpcResponse;
     }

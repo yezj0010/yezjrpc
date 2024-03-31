@@ -2,6 +2,7 @@ package cc.yezj.rpc.core.registry;
 
 import cc.yezj.rpc.core.api.ChangedListener;
 import cc.yezj.rpc.core.api.RegistryCenter;
+import cc.yezj.rpc.core.api.RpcException;
 import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.meta.ServiceMeta;
 import lombok.extern.slf4j.Slf4j;
@@ -64,8 +65,8 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ====> register zookeeper,path="+instancePath);
             client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provide".getBytes());
         }catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException(e);
+//            e.printStackTrace();
+            throw new RpcException(e);
         }
     }
 
@@ -82,8 +83,8 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info(" ====> unregister zookeeper,path="+instancePath);
             client.delete().quietly().forPath(instancePath);//删除失败不会报错
         }catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException(e);
+//            e.printStackTrace();
+            throw new RpcException(e);
         }
     }
 
@@ -95,8 +96,8 @@ public class ZkRegistryCenter implements RegistryCenter {
             log.info("fetchAll serviceName="+serviceMeta.getName()+",nodes="+nodes);
             return toInstanceMeta(nodes);
         }catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException();
+//            e.printStackTrace();
+            throw new RpcException(e);
         }
     }
 
