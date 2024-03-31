@@ -7,58 +7,97 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @YezjProvider
 public class UserServiceImpl implements UserService {
 
     @Autowired
     Environment environment;
+
     @Override
-    public User findById(long userId) {
-        User user = new User();
-        user.setId(userId);
-        user.setName("one, yezj,port="+environment.getProperty("server.port"));
-        return user;
+    public User findById(int id) {
+        return new User(id, "KK-"
+                + environment.getProperty("server.port")
+                + "_" + System.currentTimeMillis());
     }
 
     @Override
-    public User findById(int userId) {
-        User user = new User();
-        user.setId(userId);
-        user.setName("two, yezj,port="+environment.getProperty("server.port"));
-        return user;
-    }
-
-    @Override
-    public User findById(long userId, String name) {
-        User user = new User();
-        user.setId(userId);
-        user.setName("three, "+name);
-        return user;
+    public User findById(int id, String name) {
+        return new User(id, "KK-" + name + "_" + System.currentTimeMillis());
     }
 
     @Override
     public long getId(long id) {
-        return 1231331L;
+        return id;
     }
 
     @Override
     public long getId(User user) {
-        return user.getId();
+        return user.getId().longValue();
+    }
+
+    @Override
+    public long getId(float id) {
+        return 1L;
+    }
+
+    @Override
+    public String getName() {
+        return "KK123";
+    }
+
+    @Override
+    public String getName(int id) {
+        return "Cola-" + id;
     }
 
     @Override
     public int[] getIds() {
-        return new int[]{5,6,7,8};
+        return new int[] {100,200,300};
     }
 
     @Override
-    public long[] getLgIds() {
-        return new long[]{1L,2L,3L};
+    public long[] getLongIds() {
+        return new long[]{1,2,3};
     }
 
     @Override
     public int[] getIds(int[] ids) {
         return ids;
     }
+
+    @Override
+    public User[] findUsers(User[] users) {
+        return users;
+    }
+
+    @Override
+    public List<User> getList(List<User> userList) {
+        return userList;
+    }
+
+    @Override
+    public Map<String, User> getMap(Map<String, User> userMap) {
+        return userMap;
+    }
+
+    @Override
+    public Boolean getFlag(boolean flag) {
+        return !flag;
+    }
+
+    @Override
+    public User findById(long id) {
+        return new User(Long.valueOf(id).intValue(), "KK");
+    }
+
+    @Override
+    public User ex(boolean flag) {
+        if(flag) throw new RuntimeException("just throw an exception");
+        return new User(100, "JH100");
+    }
+
 }

@@ -39,6 +39,10 @@ public class ConsumerInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        if (MethodUtil.checkLocalMethod(method)) {
+            return null;
+        }
+
         RpcRequest request = new RpcRequest();
         request.setService(service.getCanonicalName());
         request.setMethodSign(MethodUtil.methodSign(method));
@@ -53,7 +57,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         RpcResponse<?> response = httpInvoker.post(request, instanceMeta.getUrl());
         log.debug("response = " + response);
         if(response != null && response.isSuccess() && response.getData() != null){
-            return TypeUtils.cast(response.getData(), method.getReturnType());
+            return TypeUtils.castMethodResult(method, response.getData());
         } else {
             if(response != null && response.getException() != null){
                 throw new RuntimeException(response.getException());
