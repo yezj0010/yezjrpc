@@ -60,7 +60,7 @@ public class ZkRegistryCenter implements RegistryCenter {
         try {
             //创建服务的持久化节点，TODO 内容只是为了方便查看，无特殊作用
             if (client.checkExists().forPath(servicePath) == null) {
-                client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, "service".getBytes());
+                client.create().withMode(CreateMode.PERSISTENT).forPath(servicePath, service.toMetas().getBytes());
             }
             //创建实例节点，临时节点
             String instancePath = servicePath + "/" + instance.toPath();
