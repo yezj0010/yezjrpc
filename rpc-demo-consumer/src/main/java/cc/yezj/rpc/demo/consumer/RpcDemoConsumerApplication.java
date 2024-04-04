@@ -47,10 +47,10 @@ public class RpcDemoConsumerApplication {
     @Bean
     public ApplicationRunner consumer_runner() {
         return x -> {
-            long start = System.currentTimeMillis();
-            userService.find(1200);
-            System.out.println("cc.yezj.rpc.demo.api.UserService.find, use = "+(System.currentTimeMillis()-start));
-//            testAll();
+//            long start = System.currentTimeMillis();
+//            userService.find(1200);
+//            System.out.println("cc.yezj.rpc.demo.api.UserService.find, use = "+(System.currentTimeMillis()-start));
+            testAll();
         };
     }
 
