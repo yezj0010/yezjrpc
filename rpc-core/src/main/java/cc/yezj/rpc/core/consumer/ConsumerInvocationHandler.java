@@ -166,10 +166,8 @@ public class ConsumerInvocationHandler implements InvocationHandler {
             return TypeUtils.castMethodResult(method, response.getData());
         } else {
             if(response != null && response.getException() != null){
-                if(response.getException() instanceof RpcException exception){
-                    throw exception;
-                }
-                throw new RpcException(response.getException(), RpcException.INTER_ERROR_EX);
+                log.error("response error.", response.getException());
+                throw response.getException();
             }
             return null;
         }

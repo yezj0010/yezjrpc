@@ -32,7 +32,7 @@ public class InstanceMeta {
     }
 
     public static InstanceMeta http(String host, Integer port){
-        return new InstanceMeta("http", host, port, "");
+        return new InstanceMeta("http", host, port, "yezjrpc");
     }
 
     public String toPath(){
@@ -40,7 +40,7 @@ public class InstanceMeta {
     }
 
     public String getUrl(){
-        return scheme+"://"+host+":"+port+"/";
+        return scheme+"://"+host+":"+port+"/"+context;
     }
 
     public String toMetas() {

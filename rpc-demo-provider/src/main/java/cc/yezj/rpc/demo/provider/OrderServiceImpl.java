@@ -3,13 +3,13 @@ package cc.yezj.rpc.demo.provider;
 import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.demo.api.Order;
 import cc.yezj.rpc.demo.api.OrderService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Random;
 
 @YezjProvider
-@Service
+@Component
 public class OrderServiceImpl implements OrderService {
 
     @Override
