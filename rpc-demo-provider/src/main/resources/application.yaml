@@ -6,8 +6,10 @@ yezjrpc:
     id: app1
     namespace: public
     env: dev
+    metas: "{gray: 'false',ids: 'bj',unit: 'B001'}"
   zkServer: localhost:2181
   zkNamespace: yezj
+
 
 logging:
   level:

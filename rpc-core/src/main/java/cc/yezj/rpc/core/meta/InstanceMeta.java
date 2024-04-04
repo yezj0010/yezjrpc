@@ -1,9 +1,11 @@
 package cc.yezj.rpc.core.meta;
 
+import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,7 +22,7 @@ public class InstanceMeta {
     private String context;//路径的上下文 就是web服务路径
 
     private boolean status;//服务端状态， online or offline
-    private Map<String, String> parameters; //可以包括IDC机房所在地，等属性
+    private Map<String, String> parameters = new HashMap<>(); //可以包括IDC机房所在地，等属性
 
     InstanceMeta(String scheme, String host, Integer port, String context){
         this.scheme = scheme;
@@ -39,5 +41,9 @@ public class InstanceMeta {
 
     public String getUrl(){
         return scheme+"://"+host+":"+port+"/";
+    }
+
+    public String toMetas() {
+        return JSON.toJSONString(this.getParameters());
     }
 }

@@ -5,6 +5,7 @@ import cc.yezj.rpc.core.api.RegistryCenter;
 import cc.yezj.rpc.core.api.RpcException;
 import cc.yezj.rpc.core.meta.InstanceMeta;
 import cc.yezj.rpc.core.meta.ServiceMeta;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -14,6 +15,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,7 +65,7 @@ public class ZkRegistryCenter implements RegistryCenter {
             //创建实例节点，临时节点
             String instancePath = servicePath + "/" + instance.toPath();
             log.info(" ====> register zookeeper,path="+instancePath);
-            client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, "provide".getBytes());
+            client.create().withMode(CreateMode.EPHEMERAL).forPath(instancePath, instance.toMetas().getBytes());
         }catch (Exception e){
 //            e.printStackTrace();
             throw new RpcException(e);
@@ -94,17 +96,29 @@ public class ZkRegistryCenter implements RegistryCenter {
         try{
             List<String> nodes = client.getChildren().forPath(servicePath);
             log.info("fetchAll serviceName="+serviceMeta.getName()+",nodes="+nodes);
-            return toInstanceMeta(nodes);
+
+            return toInstanceMeta(nodes, servicePath);
         }catch (Exception e){
 //            e.printStackTrace();
             throw new RpcException(e);
         }
     }
 
-    private List<InstanceMeta> toInstanceMeta(List<String> nodes){
+    private List<InstanceMeta> toInstanceMeta(List<String> nodes, String servicePath){
         return nodes.stream().map(i -> {
+            String nodePath = servicePath + "/" + i;
+            byte[] bytes;
+            try {
+                bytes = client.getData().forPath(nodePath);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            String feature = new String(bytes);
             String[] datas = i.split("_");
-            return InstanceMeta.http(datas[0], Integer.valueOf(datas[1]));
+            InstanceMeta instanceMeta = InstanceMeta.http(datas[0], Integer.valueOf(datas[1]));
+            HashMap parameters = JSON.parseObject(feature, HashMap.class);
+            instanceMeta.setParameters(parameters);
+            return instanceMeta;
         }).collect(Collectors.toList());
     }
 

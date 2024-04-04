@@ -53,6 +53,9 @@ public class ProviderBootStrap implements ApplicationContextAware {
     @Value("${yezjrpc.app.env}")
     private String env;
 
+    @Value("#{${yezjrpc.app.metas}}")
+    private Map<String, String> metas;
+
     private InstanceMeta instance;
 
     @PostConstruct
@@ -68,6 +71,8 @@ public class ProviderBootStrap implements ApplicationContextAware {
         //注册到zookeeper
         String ip = InetAddress.getLocalHost().getHostAddress();
         this.instance = InstanceMeta.http(ip, Integer.valueOf(port));
+        //加载服务实例信息
+        instance.getParameters().putAll(metas);
         rc.start();//注意顺序，先启动，再注册
         skeleton.keySet().forEach(this::registerService);
     }
