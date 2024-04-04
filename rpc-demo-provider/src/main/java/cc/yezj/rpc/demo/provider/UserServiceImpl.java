@@ -3,10 +3,13 @@ package cc.yezj.rpc.demo.provider;
 import cc.yezj.rpc.core.annotation.YezjProvider;
 import cc.yezj.rpc.demo.api.User;
 import cc.yezj.rpc.demo.api.UserService;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -100,10 +103,14 @@ public class UserServiceImpl implements UserService {
         return new User(100, "JH100");
     }
 
+    @Setter
+    @Getter
+    String timeoutPorts = "9101";
+
     @Override
     public User find(int timeout) {
         String property = environment.getProperty("server.port");
-        if("9101".equals(property)){
+        if(Arrays.asList(timeoutPorts.split(",")).contains(property)){
             try {
                 Thread.sleep(timeout);
             }catch (Exception e){

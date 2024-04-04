@@ -41,10 +41,10 @@ public class ConsumerBootStrap implements ApplicationContextAware, EnvironmentAw
     @Value("${yezjrpc.app.env}")
     private String env;
 
-    @Value("${yezjrpc.app.retries}")
+    @Value("${yezjrpc.app.retries:2}")
     private int retries;
 
-    @Value("${yezjrpc.app.timeout}")
+    @Value("${yezjrpc.app.timeout:1000}")
     private int timeout;
 
     private Map<String, Object> stub = new HashMap<>();
