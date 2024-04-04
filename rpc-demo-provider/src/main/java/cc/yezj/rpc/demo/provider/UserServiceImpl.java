@@ -1,6 +1,7 @@
 package cc.yezj.rpc.demo.provider;
 
 import cc.yezj.rpc.core.annotation.YezjProvider;
+import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.demo.api.User;
 import cc.yezj.rpc.demo.api.UserService;
 import lombok.Getter;
@@ -118,5 +119,12 @@ public class UserServiceImpl implements UserService {
             }
         }
         return new User(1001, "jiajiajia  "+property);
+    }
+
+    @Override
+    public String echoParameter(String key) {
+        System.out.println(" ====>> RpcContext.ContextParameters: ");
+        RpcContext.ContextParameters.get().forEach((k, v)-> System.out.println(k+" -> " +v));
+        return RpcContext.getContextParameter(key);
     }
 }

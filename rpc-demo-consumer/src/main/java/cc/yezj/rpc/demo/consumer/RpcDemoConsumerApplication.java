@@ -1,6 +1,7 @@
 package cc.yezj.rpc.demo.consumer;
 
 import cc.yezj.rpc.core.annotation.YezjConsumer;
+import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.core.consumer.ConsumerConfig;
 import cc.yezj.rpc.demo.api.OrderService;
 import cc.yezj.rpc.demo.api.User;
@@ -142,6 +143,26 @@ public class RpcDemoConsumerApplication {
         } catch (RuntimeException e) {
             System.out.println(" ===> exception: " + e.getMessage());
         }
+
+        System.out.println("Case 18. >>===[测试服务端抛出一个超时重试后成功的场景]===");
+        // 超时设置的【漏斗原则】
+        // A 2000 -> B 1500 -> C 1200 -> D 1000
+        long start = System.currentTimeMillis();
+        userService.find(1100);
+        userService.find(1100);
+        System.out.println("userService.find take "
+                + (System.currentTimeMillis()-start) + " ms");
+
+        System.out.println("Case 19. >>===[测试通过Context跨消费者和提供者进行传参]===");
+        String Key_Version = "rpc.version";
+        String Key_Message = "rpc.message";
+        RpcContext.setContextParameter(Key_Version, "v8");
+        RpcContext.setContextParameter(Key_Message, "this is a test message");
+        String version = userService.echoParameter(Key_Version);
+        String message = userService.echoParameter(Key_Message);
+        System.out.println(" ===> echo parameter from c->p->c: " + Key_Version + " -> " + version);
+        System.out.println(" ===> echo parameter from c->p->c: " + Key_Message + " -> " + message);
+        RpcContext.ContextParameters.get().put("1", "1");
     }
 
 }

@@ -57,7 +57,7 @@ public class ConsumerInvocationHandler implements InvocationHandler {
         this.providers = providers;
         this.httpInvoker = new OKHttpInvoker(Integer.parseInt(rpcContext.getParameters().getOrDefault("app.timeout", "1000")));
         this.executorService = Executors.newScheduledThreadPool(1);
-        this.executorService.scheduleWithFixedDelay(this::halfOpen, 10, 10, TimeUnit.SECONDS);
+        this.executorService.scheduleWithFixedDelay(this::halfOpen, 10, 10, TimeUnit.MINUTES);
     }
 
     AtomicInteger a = new AtomicInteger();
@@ -101,7 +101,6 @@ public class ConsumerInvocationHandler implements InvocationHandler {
                         log.debug("check alive instance="+instanceMeta);
                     }
                 }
-
 
                 RpcResponse<?> response;
                 Object result;
