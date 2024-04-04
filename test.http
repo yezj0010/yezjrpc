@@ -29,6 +29,6 @@ Content-Type: application/json
 }
 
 ### 测试
-GET http://localhost:8081/find?timeout=1200
+GET http://localhost:8081/find?timeout=100
 
 

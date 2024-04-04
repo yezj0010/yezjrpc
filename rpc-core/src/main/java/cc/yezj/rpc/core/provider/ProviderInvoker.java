@@ -1,5 +1,6 @@
 package cc.yezj.rpc.core.provider;
 
+import cc.yezj.rpc.core.api.RpcContext;
 import cc.yezj.rpc.core.api.RpcException;
 import cc.yezj.rpc.core.api.RpcRequest;
 import cc.yezj.rpc.core.api.RpcResponse;
@@ -27,6 +28,10 @@ public class ProviderInvoker {
     }
 
     public RpcResponse invoke(RpcRequest request) {
+        if(!request.getProperties().isEmpty()) {
+            request.getProperties().forEach(RpcContext::setContextParameter);//将consumer中写到threadLocal里的数据放到Request中
+        }
+
         String methodSign = request.getMethodSign();
         RpcResponse rpcResponse = new RpcResponse();
         List<ProviderMeta> providerMetas = skeleton.get(request.getService());
@@ -42,6 +47,8 @@ public class ProviderInvoker {
         } catch (IllegalAccessException e) {
 //            e.printStackTrace();
             rpcResponse.setException(new RpcException(e.getMessage()));
+        }finally {
+            RpcContext.ContextParameters.get().clear(); // 防止内存泄露和上下文污染
         }
         return rpcResponse;
     }

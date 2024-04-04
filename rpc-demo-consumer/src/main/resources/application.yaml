@@ -13,5 +13,6 @@ yezjrpc:
     env: dev
     retries: 2
     timeout: 1200
+    grayRatio: 100 # 范围0~100
   zkServer: localhost:2181
   zkNamespace: yezj

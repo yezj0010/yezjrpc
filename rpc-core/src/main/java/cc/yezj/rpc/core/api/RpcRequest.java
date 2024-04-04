@@ -3,6 +3,7 @@ package cc.yezj.rpc.core.api;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 
 @Data
@@ -13,5 +14,5 @@ public class RpcRequest implements Serializable {
 
     private Object[] args;// 参数
 
-    private Map<String, String> properties;
+    private Map<String, String> properties = new HashMap<>();
 }
