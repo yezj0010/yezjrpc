@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class rpcDemoProviderApplicationTests {
+class RpcDemoProviderApplicationTests {
 
 	static TestZKServer zkServer = new TestZKServer();
 

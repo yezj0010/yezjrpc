@@ -11,5 +11,7 @@ yezjrpc:
     id: app1
     namespace: public
     env: dev
+    grayRatio: 10
+    metas: "{gray: 'false',ids: 'bj',unit: 'B001'}"
   zkServer: localhost:2182
   zkNamespace: yezj
